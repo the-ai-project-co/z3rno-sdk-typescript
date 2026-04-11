@@ -1,0 +1,79 @@
+# Pre-commit hooks for TypeScript repo (z3rno-sdk-typescript)
+#
+# Install:
+#   pip install pre-commit  # or: brew install pre-commit
+#   pre-commit install
+#
+# Run manually:
+#   pre-commit run --all-files
+
+default_install_hook_types:
+  - pre-commit
+  - commit-msg
+
+repos:
+  # ---------------------------------------------------------------------------
+  # Generic hygiene
+  # ---------------------------------------------------------------------------
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: trailing-whitespace
+        args: [--markdown-linebreak-ext=md]
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-json
+      - id: check-merge-conflict
+      - id: check-case-conflict
+      - id: check-added-large-files
+        args: [--maxkb=500]
+      - id: mixed-line-ending
+        args: [--fix=lf]
+      - id: detect-private-key
+
+  # ---------------------------------------------------------------------------
+  # Prettier — formatter for TypeScript / JS / JSON / Markdown / YAML
+  # ---------------------------------------------------------------------------
+  - repo: https://github.com/pre-commit/mirrors-prettier
+    rev: v4.0.0-alpha.8
+    hooks:
+      - id: prettier
+        types_or:
+          - javascript
+          - jsx
+          - ts
+          - tsx
+          - json
+          - yaml
+          - markdown
+        # Skeleton-mode tolerant: skip if no package.json yet.
+        entry: bash -c 'if [ -f package.json ]; then prettier --write "$@"; else echo "skeleton mode: no package.json — skipping prettier"; fi' --
+
+  # ---------------------------------------------------------------------------
+  # ESLint — linter for TypeScript / JavaScript
+  # ---------------------------------------------------------------------------
+  - repo: local
+    hooks:
+      - id: eslint-local
+        name: eslint (local, skeleton-mode tolerant)
+        language: system
+        entry: bash -c 'if [ -f package.json ] && [ -f .eslintrc.json -o -f .eslintrc.cjs -o -f eslint.config.js ]; then npx eslint "$@"; else echo "skeleton mode: no eslint config yet — skipping"; fi' --
+        types_or:
+          - javascript
+          - jsx
+          - ts
+          - tsx
+
+  # ---------------------------------------------------------------------------
+  # commit message format (conventional commits)
+  # ---------------------------------------------------------------------------
+  - repo: https://github.com/compilerla/conventional-pre-commit
+    rev: v3.6.0
+    hooks:
+      - id: conventional-pre-commit
+        stages: [commit-msg]
+        args: [feat, fix, build, chore, ci, docs, perf, refactor, revert, style, test]
+
+ci:
+  autofix_prs: true
+  autoupdate_schedule: monthly
