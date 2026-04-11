@@ -1,0 +1,62 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  typescript:
+    name: TypeScript / Node ${{ matrix.node-version }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node-version: ['20', '22']
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: Detect project state
+        id: detect
+        shell: bash
+        run: |
+          if [ -f package.json ]; then
+            echo "has_package=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "has_package=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::No package.json yet — CI is running in skeleton mode and will no-op. Once code lands, all downstream steps will activate automatically."
+          fi
+
+      - name: Install dependencies
+        if: steps.detect.outputs.has_package == 'true'
+        run: npm ci
+
+      - name: ESLint — lint
+        if: steps.detect.outputs.has_package == 'true'
+        run: npm run lint
+
+      - name: Prettier — format check
+        if: steps.detect.outputs.has_package == 'true'
+        run: npm run format:check
+
+      - name: TypeScript — typecheck
+        if: steps.detect.outputs.has_package == 'true'
+        run: npm run typecheck
+
+      - name: Vitest — unit tests
+        if: steps.detect.outputs.has_package == 'true'
+        run: npm run test
+
+      - name: tsup — build
+        if: steps.detect.outputs.has_package == 'true'
+        run: npm run build

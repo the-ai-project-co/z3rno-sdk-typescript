@@ -1,0 +1,54 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+jobs:
+  publish:
+    name: Publish to npm (dry run until Week 8)
+    runs-on: ubuntu-latest
+    environment: release
+    permissions:
+      contents: read
+      id-token: write  # for npm provenance statements (Node 18.5+)
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Detect project state
+        id: detect
+        shell: bash
+        run: |
+          if [ -f package.json ]; then
+            echo "has_package=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "has_package=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::No package.json yet — release workflow is in skeleton mode. Activate by adding package.json and tagging v0.1.0."
+          fi
+
+      - name: Install dependencies
+        if: steps.detect.outputs.has_package == 'true'
+        run: npm ci
+
+      - name: Build
+        if: steps.detect.outputs.has_package == 'true'
+        run: npm run build
+
+      - name: Publish to npm (dry run)
+        if: steps.detect.outputs.has_package == 'true'
+        run: npm publish --dry-run --access public --provenance
+
+      # Enable in Week 8 once npm trusted publisher / NPM_TOKEN is configured:
+      # - name: Publish to npm
+      #   if: steps.detect.outputs.has_package == 'true'
+      #   run: npm publish --access public --provenance
+      #   env:
+      #     NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
