@@ -1,0 +1,52 @@
+# macOS
+.DS_Store
+Thumbs.db
+
+# Node
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+.pnp
+.pnp.js
+.yarn/cache
+.yarn/unplugged
+.yarn/build-state.yml
+.yarn/install-state.gz
+
+# Build output
+dist/
+build/
+out/
+lib/
+*.tsbuildinfo
+.next/
+.nuxt/
+.output/
+.cache/
+.parcel-cache/
+
+# Testing / coverage
+coverage/
+.nyc_output/
+*.lcov
+
+# Editors / IDEs
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Local state
+*.log
+.env
+.env.local
+.env.*.local
+
+# Secrets — never commit
+secrets/
+*.key
+*.pem
