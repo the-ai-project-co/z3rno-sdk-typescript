@@ -1,51 +1,75 @@
-# @z3rno/sdk
+# @z3rno/sdk (TypeScript)
 
-> The official TypeScript SDK for Z3rno. Zero runtime dependencies (beyond Zod). Native `fetch`. Works in Node.js 18+, Bun, Deno, and browsers.
+[![License: Apache 2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+[![CI](https://github.com/the-ai-project-co/z3rno-sdk-typescript/actions/workflows/ci.yml/badge.svg)](https://github.com/the-ai-project-co/z3rno-sdk-typescript/actions/workflows/ci.yml)
+[![npm](https://img.shields.io/npm/v/@z3rno/sdk)](https://www.npmjs.com/package/@z3rno/sdk)
 
-**License:** Apache 2.0
-**Status:** Early development — not yet on npm
-**Part of:** [Z3rno](https://github.com/the-ai-project-co) — the database for AI agent memory
+TypeScript SDK for Z3rno -- native fetch client with Zod validation.
 
 ## Installation
 
 ```bash
-npm install @z3rno/sdk   # (when published)
-# or: pnpm add @z3rno/sdk, yarn add @z3rno/sdk, bun add @z3rno/sdk
+npm install @z3rno/sdk
 ```
 
 ## Quickstart
 
 ```typescript
-import { Z3rnoClient } from '@z3rno/sdk';
+import { Z3rnoClient } from "@z3rno/sdk";
 
-const client = new Z3rnoClient({
-  baseUrl: 'https://api.z3rno.dev',  // or your self-hosted z3rno-server
-  apiKey: 'z3rno_sk_...',
-});
-
-// Store a memory
-const memory = await client.store({
-  agentId: 'agent-1',
-  content: 'User prefers dark mode and uses TypeScript.',
-  memoryType: 'semantic',
-});
-
-// Recall memories
-const results = await client.recall({
-  agentId: 'agent-1',
-  query: 'What does the user prefer?',
-  topK: 5,
-});
+const client = new Z3rnoClient({ baseUrl: "https://api.z3rno.dev", apiKey: "z3rno_sk_..." });
+const memory = await client.store({ agentId: "agent-1", content: "User prefers dark mode", memoryType: "semantic" });
+const results = await client.recall({ agentId: "agent-1", query: "What does the user prefer?", topK: 5 });
+await client.forget({ agentId: "agent-1", memoryId: memory.id });
 ```
 
-## Design
+## CJS + ESM Support
 
-- **Zero dependencies.** Only `zod` for runtime request/response validation. No `axios`, no `node-fetch`, no `pg` database driver.
-- **Native fetch everywhere.** Works in every modern JavaScript runtime.
-- **ESM + CJS dual build** via `tsup`. Tree-shakeable exports.
-- **Runtime-validated responses.** Every API response is parsed through a Zod schema before being returned — you get both compile-time and runtime type safety.
-- **Typed errors.** Same error hierarchy as the Python SDK, case-adjusted: `Z3rnoAuthenticationError`, `Z3rnoRateLimitError` (with `retryAfter`), `Z3rnoValidationError`, etc.
+The SDK ships as a dual build via tsup. Both CommonJS and ES module entry points are provided:
 
-## Parity with Python SDK
+```jsonc
+// package.json exports
+{
+  "import": "./dist/index.js",   // ESM
+  "require": "./dist/index.cjs"  // CJS
+}
+```
 
-Every method in `z3rno-sdk-python` has a case-adjusted equivalent here. Any intentional divergence is documented in `PARITY.md`.
+Works in Node.js 18+, Bun, Deno, and browsers.
+
+## Methods
+
+| Method | Description |
+|--------|-------------|
+| `store(request)` | Store a new memory with optional type, metadata, relationships, TTL, and importance |
+| `recall(params)` | Recall memories by semantic similarity query |
+| `forget(params)` | Soft-delete a memory by ID |
+| `audit(params?)` | Query the audit trail with optional filters and pagination |
+
+## Features
+
+- **Zero runtime dependencies** -- only `zod` for request/response validation. No `axios`, no database drivers.
+- **Native fetch** -- works in every modern JavaScript runtime without polyfills.
+- **Runtime-validated responses** -- every API response is parsed through a Zod schema, giving both compile-time and runtime type safety.
+- **Typed errors** -- `Z3rnoAuthenticationError`, `Z3rnoRateLimitError` (with `retryAfter`), `Z3rnoValidationError`.
+- **Tree-shakeable** -- ESM build with clean exports for optimal bundling.
+
+## API Documentation
+
+Full API reference: [docs.z3rno.dev/sdk/typescript](https://docs.z3rno.dev/sdk/typescript)
+
+## Development
+
+```bash
+npm install
+npm run typecheck
+npm run format:check
+npm test
+npm run build
+```
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for the full workflow.
+
+## License
+
+Apache 2.0 -- see [LICENSE](LICENSE).
