@@ -26,37 +26,17 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
 
-      - name: Detect project state
-        id: detect
-        shell: bash
-        run: |
-          if [ -f package.json ]; then
-            echo "has_package=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "has_package=false" >> "$GITHUB_OUTPUT"
-            echo "::notice::No package.json yet — CI is running in skeleton mode and will no-op. Once code lands, all downstream steps will activate automatically."
-          fi
-
       - name: Install dependencies
-        if: steps.detect.outputs.has_package == 'true'
         run: npm ci
 
-      - name: ESLint — lint
-        if: steps.detect.outputs.has_package == 'true'
-        run: npm run lint
-
       - name: Prettier — format check
-        if: steps.detect.outputs.has_package == 'true'
         run: npm run format:check
 
       - name: TypeScript — typecheck
-        if: steps.detect.outputs.has_package == 'true'
         run: npm run typecheck
 
       - name: Vitest — unit tests
-        if: steps.detect.outputs.has_package == 'true'
         run: npm run test
 
       - name: tsup — build
-        if: steps.detect.outputs.has_package == 'true'
         run: npm run build

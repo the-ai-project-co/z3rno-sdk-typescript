@@ -54,9 +54,7 @@ export class Z3rnoClient {
 
   // --- Store ---
 
-  async store(
-    request: StoreMemoryRequest
-  ): Promise<MemoryResponse> {
+  async store(request: StoreMemoryRequest): Promise<MemoryResponse> {
     const body = {
       agent_id: request.agentId,
       content: request.content,
@@ -133,7 +131,8 @@ export class Z3rnoClient {
     const searchParams = new URLSearchParams();
     if (params?.agentId) searchParams.set("agent_id", params.agentId);
     if (params?.page) searchParams.set("page", String(params.page));
-    if (params?.pageSize) searchParams.set("page_size", String(params.pageSize));
+    if (params?.pageSize)
+      searchParams.set("page_size", String(params.pageSize));
 
     const query = searchParams.toString();
     const path = query ? `/v1/audit?${query}` : "/v1/audit";
@@ -146,7 +145,7 @@ export class Z3rnoClient {
   private async request(
     method: string,
     path: string,
-    body?: unknown
+    body?: unknown,
   ): Promise<unknown> {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), this.timeout);
@@ -193,12 +192,9 @@ export class Z3rnoClient {
       case 429: {
         const retryAfter = parseInt(
           resp.headers.get("Retry-After") ?? "60",
-          10
+          10,
         );
-        throw new RateLimitError(
-          `Rate limit exceeded: ${detail}`,
-          retryAfter
-        );
+        throw new RateLimitError(`Rate limit exceeded: ${detail}`, retryAfter);
       }
       case 400:
       case 422:
@@ -209,7 +205,7 @@ export class Z3rnoClient {
         }
         throw new Z3rnoError(
           `Unexpected error (${resp.status}): ${detail}`,
-          resp.status
+          resp.status,
         );
     }
   }

@@ -28,7 +28,7 @@ describe("Z3rnoClient", () => {
       vi.fn().mockResolvedValue({
         ok: true,
         json: () => Promise.resolve(mockResponse),
-      })
+      }),
     );
 
     const client = new Z3rnoClient({
@@ -55,7 +55,7 @@ describe("Z3rnoClient", () => {
         statusText: "Unauthorized",
         json: () => Promise.resolve({ error: "unauthorized" }),
         headers: new Headers(),
-      })
+      }),
     );
 
     const client = new Z3rnoClient({
@@ -64,7 +64,7 @@ describe("Z3rnoClient", () => {
     });
 
     await expect(
-      client.store({ agentId: "agent-1", content: "test" })
+      client.store({ agentId: "agent-1", content: "test" }),
     ).rejects.toThrow(AuthenticationError);
 
     vi.unstubAllGlobals();
@@ -79,7 +79,7 @@ describe("Z3rnoClient", () => {
         statusText: "Too Many Requests",
         json: () => Promise.resolve({ error: "rate_limit_exceeded" }),
         headers: new Headers({ "Retry-After": "30" }),
-      })
+      }),
     );
 
     const client = new Z3rnoClient({

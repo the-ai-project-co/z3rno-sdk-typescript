@@ -39,7 +39,7 @@ export const StoreMemoryRequest = z.object({
         relationshipType: RelationshipType,
         weight: z.number().min(0).max(1).default(1.0),
         metadata: z.record(z.unknown()).default({}),
-      })
+      }),
     )
     .default([]),
   ttlSeconds: z.number().int().positive().optional(),
