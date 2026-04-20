@@ -1,6 +1,12 @@
 /**
  * Z3rno TypeScript SDK — AI agent memory database client.
  *
+ * This is the main entry point for the `@z3rno/sdk` package. It re-exports
+ * the {@link Z3rnoClient} class, all error types, and all Zod schemas /
+ * TypeScript types used by the API.
+ *
+ * @packageDocumentation
+ *
  * @example
  * ```ts
  * import { Z3rnoClient } from "@z3rno/sdk";
@@ -25,16 +31,23 @@ export {
   RateLimitError,
   ServerError,
   ValidationError,
+  Z3rnoConnectionError,
   Z3rnoError,
+  Z3rnoTimeoutError,
 } from "./errors.js";
 export {
   AuditEntry,
   AuditPageResponse,
+  BatchStoreResponse,
+  EndSessionResponse,
   ForgetResponse,
+  MemoryHistoryResponse,
   MemoryResponse,
   MemoryType,
+  MemoryVersion,
   RecallResponse,
   RecallResultItem,
   RelationshipType,
+  SessionResponse,
   type StoreMemoryRequest,
 } from "./models.js";

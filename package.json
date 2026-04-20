@@ -13,7 +13,9 @@
       "require": "./dist/index.cjs"
     }
   },
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "build": "tsup",
     "test": "vitest run",
@@ -21,7 +23,8 @@
     "lint": "tsc --noEmit",
     "format": "prettier --write 'src/**/*.ts' 'tests/**/*.ts'",
     "format:check": "prettier --check 'src/**/*.ts' 'tests/**/*.ts'",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "docs": "typedoc"
   },
   "author": "The AI Project Co. <engineering@z3rno.dev>",
   "homepage": "https://z3rno.dev",
@@ -35,10 +38,20 @@
     "@types/node": "^22.0.0",
     "prettier": "^3.8.0",
     "tsup": "^8.5.0",
+    "typedoc": "^0.28.19",
     "typescript": "^5.7.0",
     "vitest": "^3.2.0"
   },
-  "keywords": ["ai-agents", "memory", "vector-database", "rag", "agent-memory", "pgvector"],
+  "keywords": [
+    "ai-agents",
+    "memory",
+    "vector-database",
+    "rag",
+    "agent-memory",
+    "pgvector",
+    "deno",
+    "bun"
+  ],
   "license": "Apache-2.0",
   "repository": {
     "type": "git",
