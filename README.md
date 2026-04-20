@@ -58,7 +58,7 @@ For a detailed step-by-step setup, see [QUICKSTART.md](QUICKSTART.md).
 
 ## API Documentation
 
-Full API reference: [docs.z3rno.dev/sdk/typescript](https://docs.z3rno.dev/sdk/typescript)
+Full API reference: [astron-bb4261fd.mintlify.app/sdk/typescript](https://astron-bb4261fd.mintlify.app/sdk/typescript)
 
 ## Development
 
