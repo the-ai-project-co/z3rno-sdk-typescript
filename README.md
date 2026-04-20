@@ -54,6 +54,8 @@ Works in Node.js 18+, Bun, Deno, and browsers.
 - **Typed errors** -- `Z3rnoAuthenticationError`, `Z3rnoRateLimitError` (with `retryAfter`), `Z3rnoValidationError`.
 - **Tree-shakeable** -- ESM build with clean exports for optimal bundling.
 
+For a detailed step-by-step setup, see [QUICKSTART.md](QUICKSTART.md).
+
 ## API Documentation
 
 Full API reference: [docs.z3rno.dev/sdk/typescript](https://docs.z3rno.dev/sdk/typescript)
