@@ -39,6 +39,7 @@ export {
   AuditEntry,
   AuditPageResponse,
   BatchStoreResponse,
+  ConversationResponse,
   DistillJobResponse,
   DistillJobStatusResponse,
   EndSessionResponse,
@@ -57,4 +58,21 @@ export {
   RetrievalStrategy,
   SessionResponse,
   type StoreMemoryRequest,
+  TurnAddResponse,
+  TurnListResponse,
+  TurnResponse,
 } from "./models.js";
+
+// Framework adapters (Phase G slice 3).
+export { Z3rnoVercelMemory } from "./integrations/vercel-ai.js";
+export type {
+  CoreMessage,
+  Z3rnoMessageRole,
+  Z3rnoVercelMemoryOptions,
+} from "./integrations/vercel-ai.js";
+export { Z3rnoMastraMemory } from "./integrations/mastra.js";
+export type {
+  MastraMessage,
+  MastraRole,
+  Z3rnoMastraMemoryOptions,
+} from "./integrations/mastra.js";

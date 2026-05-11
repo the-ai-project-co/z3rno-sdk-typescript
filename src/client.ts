@@ -29,6 +29,7 @@ import {
 import type {
   AuditPageResponse,
   BatchStoreResponse,
+  ConversationResponse,
   DistillJobResponse,
   DistillJobStatusResponse,
   EndSessionResponse,
@@ -42,10 +43,13 @@ import type {
   RefineJobStatusResponse,
   SessionResponse,
   StoreMemoryRequest,
+  TurnAddResponse,
+  TurnListResponse,
 } from "./models.js";
 import {
   AuditPageResponse as AuditPageSchema,
   BatchStoreResponse as BatchStoreSchema,
+  ConversationResponse as ConversationSchema,
   DistillJobResponse as DistillJobSchema,
   DistillJobStatusResponse as DistillJobStatusSchema,
   EndSessionResponse as EndSessionSchema,
@@ -58,6 +62,8 @@ import {
   RefineJobResponse as RefineJobSchema,
   RefineJobStatusResponse as RefineJobStatusSchema,
   SessionResponse as SessionSchema,
+  TurnAddResponse as TurnAddSchema,
+  TurnListResponse as TurnListSchema,
 } from "./models.js";
 
 /**
@@ -305,8 +311,13 @@ export class Z3rnoClient {
      * `sentence-transformers` on the server side.
      */
     rerank?: boolean;
+    /**
+     * Phase G slice 2: scope recall to a single conversation. Older
+     * servers ignore the field.
+     */
+    conversationId?: string;
   }): Promise<RecallResponse> {
-    const body = {
+    const body: Record<string, unknown> = {
       agent_id: params.agentId,
       query: params.query,
       memory_type: params.memoryType,
@@ -318,6 +329,9 @@ export class Z3rnoClient {
       strategy: params.strategy ?? "AUTO",
       rerank: params.rerank ?? false,
     };
+    if (params.conversationId) {
+      body.conversation_id = params.conversationId;
+    }
 
     const resp = await this.request("POST", "/v1/memories/recall", body);
     return RecallSchema.parse(resp);
@@ -688,6 +702,67 @@ export class Z3rnoClient {
   async getRefineStatus(jobId: string): Promise<RefineJobStatusResponse> {
     const resp = await this.request("GET", `/v1/refine/${jobId}`);
     return RefineJobStatusSchema.parse(resp);
+  }
+
+  // --- Conversations (Phase G slice 2) ---
+
+  /**
+   * Open a new conversation. Returns the conversation row including
+   * the assigned `id`, which subsequent `recall`s and `addTurn`s
+   * reference. The `summaryCadence` controls how often the server
+   * flags the conversation for summarization.
+   */
+  async createConversation(params: {
+    agentId: string;
+    userId?: string;
+    title?: string;
+    summaryCadence?: number;
+    metadata?: Record<string, unknown>;
+  }): Promise<ConversationResponse> {
+    const body: Record<string, unknown> = {
+      agent_id: params.agentId,
+      summary_cadence: params.summaryCadence ?? 10,
+    };
+    if (params.userId) body.user_id = params.userId;
+    if (params.title) body.title = params.title;
+    if (params.metadata) body.metadata = params.metadata;
+    const resp = await this.request("POST", "/v1/conversations", body);
+    return ConversationSchema.parse(resp);
+  }
+
+  async getConversation(conversationId: string): Promise<ConversationResponse> {
+    const resp = await this.request("GET", `/v1/conversations/${conversationId}`);
+    return ConversationSchema.parse(resp);
+  }
+
+  /**
+   * Stamp an existing Memo as the next turn of the conversation.
+   * Returns the assigned `turn_index` plus `needs_summary` — when
+   * `true`, the conversation has crossed its cadence threshold.
+   */
+  async addTurn(
+    conversationId: string,
+    params: { memoryId: string; turnRole: string },
+  ): Promise<TurnAddResponse> {
+    const resp = await this.request(
+      "POST",
+      `/v1/conversations/${conversationId}/turns`,
+      { memory_id: params.memoryId, turn_role: params.turnRole },
+    );
+    return TurnAddSchema.parse(resp);
+  }
+
+  async listTurns(
+    conversationId: string,
+    params?: { afterTurn?: number; limit?: number },
+  ): Promise<TurnListResponse> {
+    const query = new URLSearchParams();
+    if (params?.afterTurn !== undefined)
+      query.set("after_turn", String(params.afterTurn));
+    query.set("limit", String(params?.limit ?? 50));
+    const path = `/v1/conversations/${conversationId}/turns?${query.toString()}`;
+    const resp = await this.request("GET", path);
+    return TurnListSchema.parse(resp);
   }
 
   // --- HTTP layer ---

@@ -572,3 +572,52 @@ export const RefineJobStatusResponse = z.object({
 });
 
 export type RefineJobStatusResponse = z.infer<typeof RefineJobStatusResponse>;
+
+
+// ---------------------------------------------------------------------------
+// Conversations — Phase G slice 2
+// ---------------------------------------------------------------------------
+
+/** Conversation metadata. */
+export const ConversationResponse = z.object({
+  id: z.string(),
+  agent_id: z.string(),
+  user_id: z.string().nullable().optional(),
+  title: z.string().nullable().optional(),
+  summary_cadence: z.number(),
+  turn_count: z.number(),
+  last_summary_turn: z.number(),
+  metadata: z.record(z.unknown()).default({}),
+  created_at: z.string(),
+  updated_at: z.string(),
+});
+
+export type ConversationResponse = z.infer<typeof ConversationResponse>;
+
+/** Result of POST /v1/conversations/{id}/turns. */
+export const TurnAddResponse = z.object({
+  turn_index: z.number(),
+  needs_summary: z.boolean(),
+});
+
+export type TurnAddResponse = z.infer<typeof TurnAddResponse>;
+
+/** One turn within a conversation. */
+export const TurnResponse = z.object({
+  memory_id: z.string(),
+  turn_index: z.number(),
+  turn_role: z.string(),
+  content: z.string(),
+  created_at: z.string(),
+});
+
+export type TurnResponse = z.infer<typeof TurnResponse>;
+
+/** Paginated turn list. */
+export const TurnListResponse = z.object({
+  turns: z.array(TurnResponse),
+  total: z.number(),
+  conversation_id: z.string(),
+});
+
+export type TurnListResponse = z.infer<typeof TurnListResponse>;
