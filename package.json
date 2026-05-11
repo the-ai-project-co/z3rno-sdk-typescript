@@ -1,6 +1,6 @@
 {
   "name": "@z3rno/sdk",
-  "version": "0.6.0",
+  "version": "0.7.0",
   "description": "TypeScript SDK for Z3rno — AI agent memory database",
   "type": "module",
   "main": "./dist/index.cjs",
