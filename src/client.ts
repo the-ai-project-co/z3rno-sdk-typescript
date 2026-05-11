@@ -752,6 +752,15 @@ export class Z3rnoClient {
     return TurnAddSchema.parse(resp);
   }
 
+  /**
+   * v0.19.3 — soft-delete a conversation. Existing turn Memos stay
+   * queryable through standard recall; the conversation itself stops
+   * accepting turns and its endpoints 404. Idempotent.
+   */
+  async deleteConversation(conversationId: string): Promise<void> {
+    await this.request("DELETE", `/v1/conversations/${conversationId}`);
+  }
+
   async listTurns(
     conversationId: string,
     params?: { afterTurn?: number; limit?: number },
