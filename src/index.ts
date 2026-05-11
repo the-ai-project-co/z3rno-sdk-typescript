@@ -58,6 +58,8 @@ export {
   RetrievalStrategy,
   SessionResponse,
   type StoreMemoryRequest,
+  TenantBudgets,
+  TenantBudgetsView,
   TurnAddResponse,
   TurnListResponse,
   TurnResponse,

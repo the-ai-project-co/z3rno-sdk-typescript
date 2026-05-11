@@ -621,3 +621,28 @@ export const TurnListResponse = z.object({
 });
 
 export type TurnListResponse = z.infer<typeof TurnListResponse>;
+
+
+// ---------------------------------------------------------------------------
+// Tenant budgets — v0.20.3
+// ---------------------------------------------------------------------------
+
+/** Per-tenant budget caps. Zero means inherit server default. */
+export const TenantBudgets = z.object({
+  daily_tokens: z.number(),
+  daily_llm_calls: z.number(),
+  daily_embeddings: z.number(),
+  monthly_tokens: z.number(),
+  monthly_llm_calls: z.number(),
+  monthly_embeddings: z.number(),
+});
+
+export type TenantBudgets = z.infer<typeof TenantBudgets>;
+
+/** Server response: stored overrides + resolved effective caps. */
+export const TenantBudgetsView = z.object({
+  overrides: TenantBudgets,
+  effective: TenantBudgets,
+});
+
+export type TenantBudgetsView = z.infer<typeof TenantBudgetsView>;

@@ -43,6 +43,8 @@ import type {
   RefineJobStatusResponse,
   SessionResponse,
   StoreMemoryRequest,
+  TenantBudgets,
+  TenantBudgetsView,
   TurnAddResponse,
   TurnListResponse,
 } from "./models.js";
@@ -62,6 +64,7 @@ import {
   RefineJobResponse as RefineJobSchema,
   RefineJobStatusResponse as RefineJobStatusSchema,
   SessionResponse as SessionSchema,
+  TenantBudgetsView as TenantBudgetsViewSchema,
   TurnAddResponse as TurnAddSchema,
   TurnListResponse as TurnListSchema,
 } from "./models.js";
@@ -772,6 +775,36 @@ export class Z3rnoClient {
     const path = `/v1/conversations/${conversationId}/turns?${query.toString()}`;
     const resp = await this.request("GET", path);
     return TurnListSchema.parse(resp);
+  }
+
+  // --- Tenant budgets (v0.20.3) ---
+
+  /**
+   * Read this org's stored budget overrides + resolved effective caps.
+   * Auth: any admin/write/read member of the calling org.
+   */
+  async getMyBudgets(): Promise<TenantBudgetsView> {
+    const resp = await this.request("GET", "/v1/tenants/me/budgets");
+    return TenantBudgetsViewSchema.parse(resp);
+  }
+
+  /**
+   * Replace this org's budget overrides. Zero / missing fields
+   * inherit the server default. Auth: admin/write only.
+   */
+  async setMyBudgets(
+    budgets: Partial<TenantBudgets>,
+  ): Promise<TenantBudgetsView> {
+    const body: TenantBudgets = {
+      daily_tokens: budgets.daily_tokens ?? 0,
+      daily_llm_calls: budgets.daily_llm_calls ?? 0,
+      daily_embeddings: budgets.daily_embeddings ?? 0,
+      monthly_tokens: budgets.monthly_tokens ?? 0,
+      monthly_llm_calls: budgets.monthly_llm_calls ?? 0,
+      monthly_embeddings: budgets.monthly_embeddings ?? 0,
+    };
+    const resp = await this.request("PUT", "/v1/tenants/me/budgets", body);
+    return TenantBudgetsViewSchema.parse(resp);
   }
 
   // --- HTTP layer ---
