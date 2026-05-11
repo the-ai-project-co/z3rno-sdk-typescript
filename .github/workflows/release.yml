@@ -23,6 +23,37 @@ jobs:
           node-version: '20'
           registry-url: 'https://registry.npmjs.org'
 
+      # v0.20.1 — pre-flight guards. Mirror of the PyPI-side checks in
+      # the Python repos. Catches the failure mode where package.json
+      # version is left behind a tag bump.
+      - name: Assert tag matches package.json version
+        run: |
+          set -euo pipefail
+          TAG="${GITHUB_REF#refs/tags/v}"
+          PKG=$(node -p "require('./package.json').version")
+          if [ "$TAG" != "$PKG" ]; then
+            echo "FAIL: git tag v${TAG} != package.json version ${PKG}. Bump package.json before tagging." >&2
+            exit 1
+          fi
+          echo "OK: tag v${TAG} == package.json ${PKG}"
+
+      - name: Assert package.json version > latest npm
+        run: |
+          set -euo pipefail
+          PKG=$(node -p "require('./package.json').version")
+          LATEST=$(npm view @z3rno/sdk version 2>/dev/null || echo "")
+          if [ -z "$LATEST" ]; then
+            echo "OK: @z3rno/sdk not yet on npm; local=${PKG}"
+            exit 0
+          fi
+          # node's semver comparator via npx
+          GREATER=$(npx --yes -p semver semver -r ">${LATEST}" "${PKG}" 2>/dev/null || echo "")
+          if [ -z "$GREATER" ]; then
+            echo "FAIL: local=${PKG} is NOT strictly greater than npm=${LATEST}. Bump before tagging." >&2
+            exit 1
+          fi
+          echo "OK: @z3rno/sdk local=${PKG} > npm=${LATEST}"
+
       - name: Install dependencies
         run: npm ci
 
