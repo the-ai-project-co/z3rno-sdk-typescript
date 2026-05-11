@@ -281,6 +281,18 @@ export class Z3rnoClient {
     filters?: Record<string, unknown>;
     topK?: number;
     similarityThreshold?: number;
+    /**
+     * Phase C: retrieval strategy. One of `AUTO | VECTOR | LEXICAL |
+     * GRAPH | TRIPLET | TRACE | TEMPORAL | ASK | CYPHER`. Default
+     * `"AUTO"` — server's LLM router picks per query.
+     */
+    strategy?: string;
+    /**
+     * Phase C: cross-encoder re-ranking. When `true`, the server
+     * re-ranks the strategy's top results. Requires
+     * `sentence-transformers` on the server side.
+     */
+    rerank?: boolean;
   }): Promise<RecallResponse> {
     const body = {
       agent_id: params.agentId,
@@ -289,6 +301,10 @@ export class Z3rnoClient {
       filters: params.filters,
       top_k: params.topK ?? 10,
       similarity_threshold: params.similarityThreshold ?? 0,
+      // Always send strategy + rerank. Older servers silently ignore
+      // unknown body fields.
+      strategy: params.strategy ?? "AUTO",
+      rerank: params.rerank ?? false,
     };
 
     const resp = await this.request("POST", "/v1/memories/recall", body);

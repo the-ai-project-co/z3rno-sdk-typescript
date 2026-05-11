@@ -48,6 +48,7 @@ export {
   RecallResponse,
   RecallResultItem,
   RelationshipType,
+  RetrievalStrategy,
   SessionResponse,
   type StoreMemoryRequest,
 } from "./models.js";

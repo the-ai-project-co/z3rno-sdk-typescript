@@ -56,6 +56,27 @@ export const RelationshipType = z.enum([
 /** Relationship type between two memories. */
 export type RelationshipType = z.infer<typeof RelationshipType>;
 
+/**
+ * Retrieval strategy for `recall({ strategy: ... })` — Phase C.
+ *
+ * `AUTO` is the default; the server's LLM router picks one of the
+ * others when configured. Use an explicit value to bypass routing.
+ */
+export const RetrievalStrategy = z.enum([
+  "AUTO",
+  "VECTOR",
+  "LEXICAL",
+  "GRAPH",
+  "TRIPLET",
+  "TRACE",
+  "TEMPORAL",
+  "ASK",
+  "CYPHER",
+]);
+
+/** Retrieval strategy enum (canonical UPPERCASE names). */
+export type RetrievalStrategy = z.infer<typeof RetrievalStrategy>;
+
 // --- Request schemas ---
 
 /**
@@ -134,6 +155,17 @@ export const RecallRequest = z.object({
   asOf: z.string().datetime().optional(),
   /** Whether to include soft-deleted memories. */
   includeDeleted: z.boolean().default(false),
+  /**
+   * Phase C retrieval strategy. `AUTO` (default) lets the server's
+   * LLM router pick the best fit. See {@link RetrievalStrategy}.
+   */
+  strategy: RetrievalStrategy.default("AUTO"),
+  /**
+   * Phase C cross-encoder re-ranking. When `true`, the server
+   * re-ranks the top results via a cross-encoder. Requires the
+   * `sentence-transformers` extra on the server.
+   */
+  rerank: z.boolean().default(false),
 });
 
 /** Parsed type for a recall request. */
@@ -228,6 +260,11 @@ export const RecallResultItem = z.object({
   created_at: z.string(),
   /** Arbitrary metadata attached to the memory. */
   metadata: z.record(z.unknown()).default({}),
+  /**
+   * Phase C per-source signals — e.g. `{ vector: 0.83, lexical: 0.61 }`.
+   * Optional so older servers (v0.7.x) keep parsing.
+   */
+  score_components: z.record(z.number()).default({}),
 });
 
 /** Parsed type for a single recall result item. */
@@ -245,6 +282,14 @@ export const RecallResponse = z.object({
   total: z.number(),
   /** The query that was searched, if any. */
   query: z.string().nullable().optional(),
+  /** Phase C: strategy that actually ran (after AUTO routing + re-rank). */
+  strategy_used: z.string().default("VECTOR"),
+  /** Phase C: AUTO's candidate list (e.g. `["AUTO->GRAPH"]`). */
+  strategies_considered: z.array(z.string()).default([]),
+  /** Phase C: whether the cross-encoder re-rank ran. */
+  reranked: z.boolean().default(false),
+  /** Phase C: end-to-end recall latency on the server (ms). */
+  elapsed_ms: z.number().default(0),
 });
 
 /** Parsed type for a recall response. */
