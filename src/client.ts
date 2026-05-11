@@ -29,22 +29,34 @@ import {
 import type {
   AuditPageResponse,
   BatchStoreResponse,
+  DistillJobResponse,
+  DistillJobStatusResponse,
   EndSessionResponse,
   ForgetResponse,
+  IngestJobResponse,
+  IngestJobStatusResponse,
   MemoryHistoryResponse,
   MemoryResponse,
   RecallResponse,
+  RefineJobResponse,
+  RefineJobStatusResponse,
   SessionResponse,
   StoreMemoryRequest,
 } from "./models.js";
 import {
   AuditPageResponse as AuditPageSchema,
   BatchStoreResponse as BatchStoreSchema,
+  DistillJobResponse as DistillJobSchema,
+  DistillJobStatusResponse as DistillJobStatusSchema,
   EndSessionResponse as EndSessionSchema,
   ForgetResponse as ForgetSchema,
+  IngestJobResponse as IngestJobSchema,
+  IngestJobStatusResponse as IngestJobStatusSchema,
   MemoryHistoryResponse as MemoryHistorySchema,
   MemoryResponse as MemorySchema,
   RecallResponse as RecallSchema,
+  RefineJobResponse as RefineJobSchema,
+  RefineJobStatusResponse as RefineJobStatusSchema,
   SessionResponse as SessionSchema,
 } from "./models.js";
 
@@ -592,6 +604,90 @@ export class Z3rnoClient {
     const path = query ? `/v1/audit?${query}` : "/v1/audit";
     const resp = await this.request("GET", path);
     return AuditPageSchema.parse(resp);
+  }
+
+  // --- Forge: ingest / distill / refine -------------------------------
+  //
+  // Wrap the server's POST /v1/ingest, /v1/distill, /v1/refine plus the
+  // matching GET status endpoints. The server gates each verb behind an
+  // operator flag (INGEST_ENABLED / DISTILL_ENABLED / REFINE_ENABLED);
+  // when off, these methods throw NotFoundError.
+
+  async ingestText(params: {
+    agentId: string;
+    text: string;
+    datasetId?: string;
+  }): Promise<IngestJobResponse> {
+    const body: Record<string, unknown> = {
+      kind: "text",
+      agent_id: params.agentId,
+      text: params.text,
+    };
+    if (params.datasetId) body.dataset_id = params.datasetId;
+    const resp = await this.request("POST", "/v1/ingest", body);
+    return IngestJobSchema.parse(resp);
+  }
+
+  async ingestUrl(params: {
+    agentId: string;
+    url: string;
+    datasetId?: string;
+  }): Promise<IngestJobResponse> {
+    const body: Record<string, unknown> = {
+      kind: "url",
+      agent_id: params.agentId,
+      url: params.url,
+    };
+    if (params.datasetId) body.dataset_id = params.datasetId;
+    const resp = await this.request("POST", "/v1/ingest", body);
+    return IngestJobSchema.parse(resp);
+  }
+
+  async getIngestStatus(jobId: string): Promise<IngestJobStatusResponse> {
+    const resp = await this.request("GET", `/v1/ingest/${jobId}`);
+    return IngestJobStatusSchema.parse(resp);
+  }
+
+  async distill(params: {
+    agentId: string;
+    memoryIds: string[];
+    chunkSize?: number;
+    chunkOverlap?: number;
+    maxConcurrency?: number;
+    summaryStyle?: string;
+    includeSummary?: boolean;
+  }): Promise<DistillJobResponse> {
+    const body: Record<string, unknown> = {
+      agent_id: params.agentId,
+      memory_ids: params.memoryIds,
+      include_summary: params.includeSummary ?? true,
+    };
+    if (params.chunkSize !== undefined) body.chunk_size = params.chunkSize;
+    if (params.chunkOverlap !== undefined)
+      body.chunk_overlap = params.chunkOverlap;
+    if (params.maxConcurrency !== undefined)
+      body.max_concurrency = params.maxConcurrency;
+    if (params.summaryStyle !== undefined)
+      body.summary_style = params.summaryStyle;
+    const resp = await this.request("POST", "/v1/distill", body);
+    return DistillJobSchema.parse(resp);
+  }
+
+  async getDistillStatus(jobId: string): Promise<DistillJobStatusResponse> {
+    const resp = await this.request("GET", `/v1/distill/${jobId}`);
+    return DistillJobStatusSchema.parse(resp);
+  }
+
+  async refine(params?: { datasetId?: string }): Promise<RefineJobResponse> {
+    const body: Record<string, unknown> = {};
+    if (params?.datasetId) body.dataset_id = params.datasetId;
+    const resp = await this.request("POST", "/v1/refine", body);
+    return RefineJobSchema.parse(resp);
+  }
+
+  async getRefineStatus(jobId: string): Promise<RefineJobStatusResponse> {
+    const resp = await this.request("GET", `/v1/refine/${jobId}`);
+    return RefineJobStatusSchema.parse(resp);
   }
 
   // --- HTTP layer ---

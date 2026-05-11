@@ -466,3 +466,109 @@ export const EndSessionResponse = z.object({
 
 /** Parsed type for an end-session response. */
 export type EndSessionResponse = z.infer<typeof EndSessionResponse>;
+
+// ---------------------------------------------------------------------------
+// Forge verbs — ingest / distill / refine (Phase A / B / D)
+// ---------------------------------------------------------------------------
+
+/** Response to POST /v1/ingest — the enqueue ack. */
+export const IngestJobResponse = z.object({
+  job_id: z.string(),
+  kind: z.string(),
+  status: z.string(),
+  dataset_id: z.string().nullable().optional(),
+  enqueued_at: z.string(),
+});
+
+export type IngestJobResponse = z.infer<typeof IngestJobResponse>;
+
+/** Full state from GET /v1/ingest/{job_id}. */
+export const IngestJobStatusResponse = z.object({
+  job_id: z.string(),
+  agent_id: z.string(),
+  dataset_id: z.string().nullable().optional(),
+  kind: z.string(),
+  status: z.string(),
+  source_uri: z.string().nullable().optional(),
+  content_type: z.string().nullable().optional(),
+  filename: z.string().nullable().optional(),
+  file_size: z.number().nullable().optional(),
+  memory_ids: z.array(z.string()).default([]),
+  memos_written: z.number().default(0),
+  distill_job_id: z.string().nullable().optional(),
+  codegraph_memos_written: z.number().default(0),
+  codegraph_edges_written: z.number().default(0),
+  error: z.string().nullable().optional(),
+  warnings: z.array(z.record(z.unknown())).default([]),
+  started_at: z.string().nullable().optional(),
+  completed_at: z.string().nullable().optional(),
+  created_at: z.string().nullable().optional(),
+  updated_at: z.string().nullable().optional(),
+});
+
+export type IngestJobStatusResponse = z.infer<typeof IngestJobStatusResponse>;
+
+/** Distill enqueue ack. */
+export const DistillJobResponse = z.object({
+  job_id: z.string(),
+  status: z.string(),
+  memory_ids: z.array(z.string()),
+  enqueued_at: z.string(),
+});
+
+export type DistillJobResponse = z.infer<typeof DistillJobResponse>;
+
+/** Full distill job state. */
+export const DistillJobStatusResponse = z.object({
+  job_id: z.string(),
+  agent_id: z.string(),
+  status: z.string(),
+  model: z.string(),
+  memory_ids: z.array(z.string()),
+  chunk_size: z.number(),
+  chunk_overlap: z.number(),
+  max_concurrency: z.number(),
+  chunks_total: z.number(),
+  chunks_failed: z.number(),
+  entities_extracted: z.number(),
+  relationships_extracted: z.number(),
+  memos_written: z.number(),
+  error: z.string().nullable().optional(),
+  started_at: z.string().nullable().optional(),
+  completed_at: z.string().nullable().optional(),
+  created_at: z.string().nullable().optional(),
+  updated_at: z.string().nullable().optional(),
+});
+
+export type DistillJobStatusResponse = z.infer<typeof DistillJobStatusResponse>;
+
+/** Refine enqueue ack. */
+export const RefineJobResponse = z.object({
+  job_id: z.string(),
+  status: z.string(),
+  dataset_id: z.string().nullable().optional(),
+  enqueued_at: z.string(),
+});
+
+export type RefineJobResponse = z.infer<typeof RefineJobResponse>;
+
+/** Full refine job state. */
+export const RefineJobStatusResponse = z.object({
+  job_id: z.string(),
+  status: z.string(),
+  dataset_id: z.string().nullable().optional(),
+  trigger: z.string(),
+  memos_scanned: z.number().default(0),
+  memos_deduped: z.number().default(0),
+  edges_reweighted: z.number().default(0),
+  edges_pruned: z.number().default(0),
+  feedback_drained: z.number().default(0),
+  job_metadata: z.record(z.unknown()).default({}),
+  error: z.string().nullable().optional(),
+  started_at: z.string().nullable().optional(),
+  completed_at: z.string().nullable().optional(),
+  created_at: z.string().nullable().optional(),
+  updated_at: z.string().nullable().optional(),
+});
+
+export type RefineJobStatusResponse = z.infer<typeof RefineJobStatusResponse>;
