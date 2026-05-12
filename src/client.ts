@@ -808,6 +808,19 @@ export class Z3rnoClient {
   // --- Tenant budgets (v0.20.3) ---
 
   /**
+   * Cross-tenant admin sub-namespace (v0.22.1, slice 21.3).
+   *
+   * Pairs with z3rno-server v0.22.1's `/v1/tenants/{orgId}/budgets`
+   * surface. Requires `SUPERADMIN_ENABLED=true` on the server and
+   * the client to be configured with the matching superadmin API
+   * key. Methods raise `AuthenticationError` (401) or a generic
+   * `Z3rnoError` (403) otherwise.
+   */
+  get admin(): AdminAPI {
+    return new AdminAPI(this.request.bind(this));
+  }
+
+  /**
    * Read this org's stored budget overrides + resolved effective caps.
    * Auth: any admin/write/read member of the calling org.
    */
@@ -987,5 +1000,55 @@ export class Z3rnoClient {
           resp.status,
         );
     }
+  }
+}
+
+/**
+ * Cross-tenant admin sub-namespace exposed via `client.admin`.
+ *
+ * Construction captures the parent client's `request` method as a
+ * bound closure — no privileged access to the class internals, just
+ * a function reference. That's deliberate: the namespace is
+ * dependency-injected the same way a stub would be, so test doubles
+ * can swap it out without touching the parent client.
+ */
+export class AdminAPI {
+  constructor(
+    private readonly request: (
+      method: string,
+      path: string,
+      body?: unknown,
+    ) => Promise<unknown>,
+  ) {}
+
+  /**
+   * Read another tenant's budget overrides + effective caps.
+   *
+   * Requires `SUPERADMIN_ENABLED=true` server-side and the client to
+   * be configured with the superadmin API key.
+   */
+  async getBudgets(orgId: string): Promise<TenantBudgetsView> {
+    const resp = await this.request("GET", `/v1/tenants/${orgId}/budgets`);
+    return TenantBudgetsViewSchema.parse(resp);
+  }
+
+  /**
+   * Replace another tenant's budget overrides. Zero / missing fields
+   * inherit the server default.
+   */
+  async setBudgets(
+    orgId: string,
+    budgets: Partial<TenantBudgets>,
+  ): Promise<TenantBudgetsView> {
+    const body: TenantBudgets = {
+      daily_tokens: budgets.daily_tokens ?? 0,
+      daily_llm_calls: budgets.daily_llm_calls ?? 0,
+      daily_embeddings: budgets.daily_embeddings ?? 0,
+      monthly_tokens: budgets.monthly_tokens ?? 0,
+      monthly_llm_calls: budgets.monthly_llm_calls ?? 0,
+      monthly_embeddings: budgets.monthly_embeddings ?? 0,
+    };
+    const resp = await this.request("PUT", `/v1/tenants/${orgId}/budgets`, body);
+    return TenantBudgetsViewSchema.parse(resp);
   }
 }

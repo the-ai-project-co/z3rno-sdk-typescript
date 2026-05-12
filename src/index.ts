@@ -23,7 +23,7 @@
  * ```
  */
 
-export { Z3rnoClient } from "./client.js";
+export { Z3rnoClient, AdminAPI } from "./client.js";
 export type { Z3rnoClientConfig } from "./client.js";
 export {
   AuthenticationError,
