@@ -299,7 +299,21 @@ export class Z3rnoClient {
     agentId: string;
     query?: string;
     memoryType?: string;
+    /**
+     * v0.21.2 — JSONB metadata containment filter
+     * (`metadata @> :metadata_filter` server-side). Renamed from
+     * `filters`; the old name is still accepted via `filters` below
+     * but emits a deprecation warning.
+     */
+    metadataFilter?: Record<string, unknown>;
+    /** @deprecated Use `metadataFilter` instead. */
     filters?: Record<string, unknown>;
+    /**
+     * v0.21.1 — scope by end-user id (the `memories.user_id`
+     * column). Multi-user agents use this for per-user recall
+     * isolation. Real WHERE predicate, not just audit context.
+     */
+    userId?: string;
     topK?: number;
     similarityThreshold?: number;
     /**
@@ -320,11 +334,22 @@ export class Z3rnoClient {
      */
     conversationId?: string;
   }): Promise<RecallResponse> {
+    // v0.21.2 — honour the deprecated `filters` alias.
+    let metadataFilter = params.metadataFilter;
+    if (params.filters !== undefined && metadataFilter === undefined) {
+      if (typeof console !== "undefined" && console.warn) {
+        console.warn(
+          "Z3rnoClient.recall({filters}) is deprecated; use {metadataFilter} instead.",
+        );
+      }
+      metadataFilter = params.filters;
+    }
+
     const body: Record<string, unknown> = {
       agent_id: params.agentId,
       query: params.query,
       memory_type: params.memoryType,
-      filters: params.filters,
+      metadata_filter: metadataFilter,
       top_k: params.topK ?? 10,
       similarity_threshold: params.similarityThreshold ?? 0,
       // Always send strategy + rerank. Older servers silently ignore
@@ -332,6 +357,9 @@ export class Z3rnoClient {
       strategy: params.strategy ?? "AUTO",
       rerank: params.rerank ?? false,
     };
+    if (params.userId) {
+      body.user_id = params.userId;
+    }
     if (params.conversationId) {
       body.conversation_id = params.conversationId;
     }
