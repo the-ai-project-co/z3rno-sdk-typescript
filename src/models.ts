@@ -319,26 +319,32 @@ export type ForgetResponse = z.infer<typeof ForgetResponse>;
  *
  * Audit entries record every operation performed on the agent's memories.
  */
-export const AuditEntry = z.object({
-  /** Auto-incrementing audit entry ID. */
-  id: z.number(),
-  /** UUID of the agent, if applicable. */
-  agent_id: z.string().nullable().optional(),
-  /** UUID of the user, if applicable. */
-  user_id: z.string().nullable().optional(),
-  /** Operation type (e.g., `"store"`, `"recall"`, `"forget"`). */
-  operation: z.string(),
-  /** UUID of the affected memory, if applicable. */
-  memory_id: z.string().nullable().optional(),
-  /** Memory type of the affected memory, if applicable. */
-  memory_type: z.string().nullable().optional(),
-  /** Additional details about the operation. */
-  details: z.record(z.unknown()).default({}),
-  /** IP address of the caller, if available. */
-  ip_address: z.string().nullable().optional(),
-  /** ISO 8601 timestamp of the operation. */
-  created_at: z.string(),
-});
+export const AuditEntry = z
+  .object({
+    /** Auto-incrementing audit entry ID. */
+    id: z.number(),
+    /** UUID of the agent, if applicable. */
+    agent_id: z.string().nullable().optional(),
+    /** UUID of the user, if applicable. */
+    user_id: z.string().nullable().optional(),
+    /** Operation type (e.g., `"store"`, `"recall"`, `"forget"`). */
+    operation: z.string(),
+    /** UUID of the affected memory, if applicable. */
+    memory_id: z.string().nullable().optional(),
+    /** Memory type of the affected memory, if applicable. */
+    memory_type: z.string().nullable().optional(),
+    /** Additional details about the operation. */
+    details: z.record(z.unknown()).default({}),
+    /** IP address of the caller, if available. */
+    ip_address: z.string().nullable().optional(),
+    /** ISO 8601 timestamp of the operation. */
+    created_at: z.string(),
+  })
+  .transform((data) => ({
+    ...data,
+    /** Alias for `created_at`. Added in v0.8.1 for cross-SDK naming parity. */
+    timestamp: data.created_at,
+  }));
 
 /** Parsed type for an audit entry. */
 export type AuditEntry = z.infer<typeof AuditEntry>;
@@ -348,18 +354,24 @@ export type AuditEntry = z.infer<typeof AuditEntry>;
  *
  * Supports cursor-based pagination via `page` and `page_size`.
  */
-export const AuditPageResponse = z.object({
-  /** Audit entries on this page. */
-  entries: z.array(AuditEntry),
-  /** Total number of matching audit entries. */
-  total: z.number(),
-  /** Current page number (1-indexed). */
-  page: z.number(),
-  /** Number of entries per page. */
-  page_size: z.number(),
-  /** Whether more pages are available. */
-  has_next: z.boolean(),
-});
+export const AuditPageResponse = z
+  .object({
+    /** Audit entries on this page. */
+    entries: z.array(AuditEntry),
+    /** Total number of matching audit entries. */
+    total: z.number(),
+    /** Current page number (1-indexed). */
+    page: z.number(),
+    /** Number of entries per page. */
+    page_size: z.number(),
+    /** Whether more pages are available. */
+    has_next: z.boolean(),
+  })
+  .transform((data) => ({
+    ...data,
+    /** Alias for `total`. Added in v0.8.1 for cross-SDK naming parity. */
+    total_count: data.total,
+  }));
 
 /** Parsed type for a paginated audit response. */
 export type AuditPageResponse = z.infer<typeof AuditPageResponse>;

@@ -110,4 +110,24 @@ describe("AuditPageResponse", () => {
     });
     expect(result.has_next).toBe(false);
   });
+
+  it("exposes total_count + timestamp aliases (v0.8.1)", () => {
+    const result = AuditPageResponse.parse({
+      entries: [
+        {
+          id: 1,
+          operation: "store",
+          created_at: "2026-05-13T00:00:00Z",
+        },
+      ],
+      total: 7,
+      page: 1,
+      page_size: 50,
+      has_next: false,
+    });
+    expect(result.total_count).toBe(7);
+    expect(result.total_count).toBe(result.total);
+    expect(result.entries[0].timestamp).toBe("2026-05-13T00:00:00Z");
+    expect(result.entries[0].timestamp).toBe(result.entries[0].created_at);
+  });
 });
