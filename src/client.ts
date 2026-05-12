@@ -906,6 +906,14 @@ export class Z3rnoClient {
 
   private async handleResponse(resp: Response): Promise<unknown> {
     if (resp.ok) {
+      // 204 No Content: DELETE-style endpoints (deleteConversation,
+      // key revoke) return an empty body. Calling resp.json() on it
+      // rejects with SyntaxError ("Unexpected end of JSON input"),
+      // which the retry loop above wraps and burns through every
+      // retry attempt before timing out. Short-circuit instead.
+      if (resp.status === 204) {
+        return undefined;
+      }
       return resp.json();
     }
 
