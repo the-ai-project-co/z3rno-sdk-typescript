@@ -1,5 +1,14 @@
 # @z3rno/sdk (TypeScript)
 
+> ## ⚠️ Deprecated — full rewrite in progress
+>
+> z3rno is being rewritten from the ground up as a single open-source Rust monorepo (Apache 2.0), following direct feedback from enterprise users that the current architecture is too complex.
+>
+> - **Maintenance mode only** — bug fixes, no new features.
+> - Existing installs keep working. Nothing here is being yanked, archived, or removed.
+> - The new monorepo lands at `the-ai-project-co/z3rno`.
+> - Track progress: https://github.com/the-ai-project-co/z3rno-sdk-typescript/issues/3
+
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![CI](https://github.com/the-ai-project-co/z3rno-sdk-typescript/actions/workflows/ci.yml/badge.svg)](https://github.com/the-ai-project-co/z3rno-sdk-typescript/actions/workflows/ci.yml)
 [![npm](https://img.shields.io/npm/v/@z3rno/sdk)](https://www.npmjs.com/package/@z3rno/sdk)
