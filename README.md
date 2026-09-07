@@ -3,6 +3,8 @@
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![CI](https://github.com/the-ai-project-co/z3rno-sdk-typescript/actions/workflows/ci.yml/badge.svg)](https://github.com/the-ai-project-co/z3rno-sdk-typescript/actions/workflows/ci.yml)
 [![npm](https://img.shields.io/npm/v/@z3rno/sdk)](https://www.npmjs.com/package/@z3rno/sdk)
+[![GitHub downloads](https://img.shields.io/github/downloads/the-ai-project-co/z3rno-sdk-typescript/total)](https://github.com/the-ai-project-co/z3rno-sdk-typescript/releases)
+[![npm downloads](https://img.shields.io/npm/dm/@z3rno/sdk)](https://www.npmjs.com/package/@z3rno/sdk)
 
 TypeScript SDK for Z3rno -- native fetch client with Zod validation.
 
